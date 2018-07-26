@@ -1,0 +1,155 @@
+---
+# tasks file for opencv
+- name: Remove unused packages to claim space
+  become: true
+  apt: name={{ item }} state=absent purge=yes autoremove=yes autoclean=yes
+  with_items:
+    - wolfram-engine
+    - libreoffice*
+
+- name: Update and Upgrade the packages
+  become: true
+  apt:
+    upgrade: yes
+    update_cache: yes
+
+- name: Install Developer Tools
+  become: true
+  apt: name={{ item }} state=present
+  with_items:
+    - build-essential
+    - cmake
+    - pkg-config
+
+- name: Install image I/O packages
+  apt: name={{ item }} state=present
+  with_items:
+    - libjpeg-dev
+    - libtiff5-dev
+    - libjasper-dev
+    - libpng12-dev
+
+- name: Install video I/O packages-1
+  apt: name={{ item }} state=present
+  with_items:
+    - libavcodec-dev
+    - libavformat-dev
+    - libswscale-dev
+    - libv4l-dev
+
+- name: Install video I/O packages-2
+  apt: name={{ item }} state=present
+  with_items:
+    - libxvidcore-dev
+    - libx264-dev
+
+- name: Install high GUI module
+  apt: name={{ item }} state=present
+  with_items:
+    - libgtk2.0-dev
+    - libgtk-3-dev
+
+- name: Matrix operations dependancies
+  apt: name={{ item }} state=present
+  with_items:
+    - libatlas-base-dev
+    - gfortran
+
+- name: Install Python 2 and 3
+  apt: name={{ item }} state=present
+  with_items:
+    - python2.7-dev
+    - python3-dev
+
+- name: Download OpenCV Source code
+  get_url:
+    dest: "{{ install_dir }}/opencv.zip"
+    force: yes
+    url: "{{ opencv_url }}"
+
+- name: Unzip Opencv zip archive
+  unarchive:
+    remote_src: yes
+    src: "{{ install_dir }}/opencv.zip"
+    dest: "{{ install_dir }}/"
+
+- name: Remove the zip archive
+  file:
+    path: "{{ install_dir }}/opencv.zip"
+    state: absent
+
+- name: Download OpenCV contrib code
+  get_url:
+    dest: "{{ install_dir }}/opencv_contrib.zip"
+    force: yes
+    url: "{{ opencv_contrib }}"
+
+- name: Unzip Opencv contrib zip archive
+  unarchive:
+    remote_src: yes
+    src: "{{ install_dir }}/opencv_contrib.zip"
+    dest: "{{ install_dir }}/"
+
+- name: Remove the zip archive
+  file:
+    path: "{{ install_dir }}/opencv_contrib.zip"
+    state: absent
+
+- name: install numpy
+  become: true
+  pip:
+    name: numpy
+    state: present
+
+- name: Make opencv build directory
+  command: mkdir {{ install_dir }}/opencv-3.3.0/build
+
+- name: Build setup
+  become: true
+  command: chdir={{ install_dir }}/opencv-3.3.0/build/ cmake -D CMAKE_BUILD_TYPE=RELEASE -D CMAKE_INSTALL_PREFIX=/usr/local -D INSTALL_PYTHON_EXAMPLES=ON -D OPENCV_EXTRA_MODULES_PATH={{ install_dir }}/opencv_contrib-3.3.0/modules -D BUILD_EXAMPLES=ON ..
+
+- name: Modify swap
+  become: true
+  lineinfile:
+    path: /etc/dphys-swapfile
+    regexp: '^CONF_SWAPSIZE=*'
+    line: 'CONF_SWAPSIZE=1024'
+
+- name: Stop swap space
+  become: true
+  command: /etc/init.d/dphys-swapfile stop
+
+- name: Start swap space
+  become: true
+  command: /etc/init.d/dphys-swapfile start
+
+- name: Compile opencv
+  become: true
+  command: chdir={{ install_dir }}/opencv-3.3.0/build/ make -j4
+
+- name: Run Make install
+  become: true
+  command: chdir={{ install_dir }}/opencv-3.3.0/build/ make install
+
+- name: Run ldconfig
+  become: true
+  command: ldconfig
+
+- name: Modify swap
+  become: true
+  lineinfile:
+    path: /etc/dphys-swapfile
+    regexp: '^CONF_SWAPSIZE=*'
+    line: 'CONF_SWAPSIZE=100'
+
+- name: Stop swap space
+  become: true
+  command: /etc/init.d/dphys-swapfile stop
+
+- name: Start swap space
+  become: true
+  command: /etc/init.d/dphys-swapfile start
+
+- name: Remove opencv dirs
+  become: true
+  command: rm -rf {{ install_dir }}/opencv-3.3.0 {{ install_dir }}/opencv_contrib-3.3.0
