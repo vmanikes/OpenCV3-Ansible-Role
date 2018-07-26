@@ -20,4 +20,4 @@ Example Playbook
 ----------------
 Run the following command to install opencv via this playbook
 
-`ansible-playbook opencv.yaml -i hosts --ask-become-pass -e "host_name=<name of the host block in hosts>"`
+`ansible-playbook opencv.yaml -i <path_to_hosts_file> --ask-become-pass -e "host_name=<name of the host block in hosts file>"`
