@@ -1,0 +1,5 @@
+---
+# vars file for opencv
+install_dir: /home/pi
+opencv_url: "https://github.com/Itseez/opencv/archive/3.3.0.zip"
+opencv_contrib: "https://github.com/Itseez/opencv_contrib/archive/3.3.0.zip"
