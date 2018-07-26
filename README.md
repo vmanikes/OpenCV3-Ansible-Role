@@ -1,2 +1,23 @@
-# OpenCV3-Ansible-Role
-Ansible Role to install opencv-3.3.0 for python 3.x and python 2.7
+OpenCV python 3
+===============
+
+Ansible role to install Opencv 3 for python.
+
+Requirements
+------------
+ - python3
+ - pip3
+ - ansible
+
+Role Variables
+--------------
+
+- **install_dir: /home/pi** -> Directory to install OpenCV
+- **oepncv_url: "https://github.com/Itseez/opencv/archive/3.3.0.zip"** -> Download URL for opencv
+- **opencv_contrib: "https://github.com/Itseez/opencv_contrib/archive/3.3.0.zip"** -> Extra modules for SIFT and SURF
+
+Example Playbook
+----------------
+Run the following command to install opencv via this playbook
+
+`ansible-playbook opencv.yaml -i hosts --ask-become-pass -e "host_name=<name of the host block in hosts>"`
