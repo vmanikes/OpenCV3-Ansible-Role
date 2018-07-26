@@ -1,0 +1,4 @@
+---
+  - hosts: "{{ host_name | default('dev') }}"
+    roles:
+      - opencv
